@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SaunaView: View {
     @EnvironmentObject var monitor: SaunaMonitor
+    @ObservedObject private var loc = Localizer.shared
     @State private var showSettings = false
 
     var body: some View {
@@ -114,7 +115,7 @@ struct SaunaView: View {
     }
 
     private var doorShortLabel: String {
-        monitor.doorOpen ? "Drzwi otwarte" : "Drzwi OK"
+        monitor.doorOpen ? loc.t(.doorOpen) : loc.t(.doorOK)
     }
 
     private var doorIcon: String {
@@ -138,7 +139,7 @@ struct SaunaView: View {
             HStack {
                 Text("0°")
                 Spacer()
-                Text("Cel \(monitor.targetString)")
+                Text(loc.t(.targetShort, monitor.targetString))
             }
             .font(.system(size: 9, weight: .medium))
             .foregroundStyle(.white.opacity(0.5))
@@ -169,7 +170,7 @@ struct SaunaView: View {
 
     private var targetTemperatureControl: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("Temperatura docelowa")
+            Text(loc.t(.targetTemperature))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(.secondary)
 
@@ -224,7 +225,7 @@ struct SaunaView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
-        .help(monitor.lightOn ? "Wyłącz światło" : "Włącz światło")
+        .help(monitor.lightOn ? loc.t(.turnOffLight) : loc.t(.turnOnLight))
     }
 
     private var fanRunButton: some View {
@@ -241,13 +242,13 @@ struct SaunaView: View {
                 )
         }
         .buttonStyle(.plain)
-        .help(monitor.fanIsActive ? "Wyłącz wentylator" : "Uruchom wentylator na \(monitor.fanDuration) min")
+        .help(monitor.fanIsActive ? loc.t(.turnOffFan) : loc.t(.startFanFor, monitor.fanDuration))
     }
 
     private var fanRunLabel: String {
         monitor.fanIsActive && monitor.fanRemainingSeconds > 0
             ? monitor.fanRemainingString
-            : (monitor.fanIsActive ? "Stop" : "Start")
+            : (monitor.fanIsActive ? loc.t(.stop) : loc.t(.start))
     }
 
     private var fanLevelMenu: some View {
@@ -271,13 +272,13 @@ struct SaunaView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .frame(width: 42, height: 32)
-        .help("Poziom wentylatora: \(monitor.fanLevel)")
+        .help(loc.t(.fanLevelHelp, monitor.fanLevel))
     }
 
     private var fanDurationMenu: some View {
         Menu {
             ForEach([5, 10, 15, 30], id: \.self) { minutes in
-                Button("\(minutes) min") {
+                Button(loc.t(.minutesShort, minutes)) {
                     monitor.setFanDuration(minutes)
                 }
             }
@@ -295,15 +296,15 @@ struct SaunaView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .frame(width: 48, height: 32)
-        .help("Czas wentylatora: \(monitor.fanDuration) min")
+        .help(loc.t(.fanDurationHelp, monitor.fanDuration))
     }
 
     private func fanLabel(for speed: Int) -> String {
         switch speed {
-        case 1: return "Wentylator niski"
-        case 2: return "Wentylator średni"
-        case 3: return "Wentylator wysoki"
-        default: return "Wentylator wyłączony"
+        case 1: return loc.t(.fanLow)
+        case 2: return loc.t(.fanMedium)
+        case 3: return loc.t(.fanHigh)
+        default: return loc.t(.fanOff)
         }
     }
 
@@ -340,19 +341,19 @@ struct SaunaView: View {
 
     private var diagnosticsMenu: some View {
         Menu {
-            diagnosticRow("Typ sauny", "\(monitor.saunaType)")
-            diagnosticRow("Czas sesji", durationLabel(minutes: monitor.saunaDuration))
-            diagnosticRow("Czas wentylatora", "\(monitor.fanDuration) min")
-            diagnosticRow("Poziom wentylatora", "\(monitor.displayedFanSpeed)")
-            diagnosticRow("Rejestr wentylatora", "\(monitor.fanSpeed)")
-            diagnosticRow("Grzałki aktywne", monitor.heaterElementsString)
-            diagnosticRow("Drzwi", monitor.doorString)
-            diagnosticRow("Uptime", monitor.uptimeString)
+            diagnosticRow(loc.t(.diagSaunaType), "\(monitor.saunaType)")
+            diagnosticRow(loc.t(.diagSessionTime), durationLabel(minutes: monitor.saunaDuration))
+            diagnosticRow(loc.t(.diagFanDuration), loc.t(.minutesShort, monitor.fanDuration))
+            diagnosticRow(loc.t(.diagFanLevel), "\(monitor.displayedFanSpeed)")
+            diagnosticRow(loc.t(.diagFanRegister), "\(monitor.fanSpeed)")
+            diagnosticRow(loc.t(.diagHeatersActive), monitor.heaterElementsString)
+            diagnosticRow(loc.t(.diagDoor), monitor.doorString)
+            diagnosticRow(loc.t(.diagUptime), monitor.uptimeString)
 
             Divider()
 
             if monitor.alarms.isEmpty {
-                Text("Brak alarmów")
+                Text(loc.t(.noAlarms))
             } else {
                 ForEach(monitor.alarms) { alarm in
                     Label(alarm.label, systemImage: "exclamationmark.triangle.fill")
@@ -366,7 +367,7 @@ struct SaunaView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .buttonStyle(.plain)
-        .help("Diagnostyka")
+        .help(loc.t(.diagnostics))
     }
 
     private func diagnosticRow(_ title: String, _ value: String) -> some View {
@@ -374,12 +375,12 @@ struct SaunaView: View {
     }
 
     private func durationLabel(minutes: Int) -> String {
-        minutes == 0 ? "Domyślnie" : "\(minutes) min"
+        minutes == 0 ? loc.t(.defaultValue) : loc.t(.minutesShort, minutes)
     }
 
     private var footerLabel: String {
-        if !monitor.isConnected { return "Brak połączenia" }
-        guard let updated = monitor.lastUpdated else { return "Łączenie…" }
-        return "Odświeżono o \(updated.formatted(date: .omitted, time: .shortened))"
+        if !monitor.isConnected { return loc.t(.noConnection) }
+        guard let updated = monitor.lastUpdated else { return loc.t(.connecting) }
+        return loc.t(.refreshedAt, updated.formatted(date: .omitted, time: .shortened))
     }
 }

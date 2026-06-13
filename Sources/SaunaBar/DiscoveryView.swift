@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiscoveryView: View {
     @EnvironmentObject var monitor: SaunaMonitor
+    @ObservedObject private var loc = Localizer.shared
     @StateObject private var discovery = SaunaDiscovery()
 
     @State private var showManual = false
@@ -35,10 +36,10 @@ struct DiscoveryView: View {
                 Image(systemName: "wifi.router.fill")
                     .font(.system(size: 32))
                     .foregroundStyle(.white.opacity(0.9))
-                Text("Szukanie sauny")
+                Text(loc.t(.searchingSauna))
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Skanowanie sieci lokalnej w poszukiwaniu\nurządzenia Saunum")
+                Text(loc.t(.scanningSubtitle))
                     .font(.system(size: 11))
                     .foregroundStyle(.white.opacity(0.65))
                     .multilineTextAlignment(.center)
@@ -58,7 +59,7 @@ struct DiscoveryView: View {
 
             if !discovery.candidates.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Znalezione urządzenia")
+                    Text(loc.t(.foundDevices))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.secondary)
 
@@ -75,7 +76,7 @@ struct DiscoveryView: View {
             }
 
             HStack {
-                Button(discovery.isScanning ? "Skanowanie…" : "Skanuj ponownie") {
+                Button(discovery.isScanning ? loc.t(.scanning) : loc.t(.scanAgain)) {
                     discovery.startScan()
                 }
                 .disabled(discovery.isScanning)
@@ -85,7 +86,7 @@ struct DiscoveryView: View {
 
                 Spacer()
 
-                Button(showManual ? "Ukryj" : "Podaj IP ręcznie") {
+                Button(showManual ? loc.t(.hide) : loc.t(.enterIPManually)) {
                     showManual.toggle()
                 }
                 .buttonStyle(.plain)
@@ -124,12 +125,12 @@ struct DiscoveryView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(config.host)
                     .font(.system(size: 13, weight: .medium, design: .monospaced))
-                Text("Port \(config.port)")
+                Text(loc.t(.portLabel, Int(config.port)))
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Połącz") { connect(config) }
+            Button(loc.t(.connect)) { connect(config) }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
         }
@@ -148,7 +149,7 @@ struct DiscoveryView: View {
                 .frame(maxWidth: .infinity)
                 .onSubmit { connectManual() }
 
-            Button("Połącz") { connectManual() }
+            Button(loc.t(.connect)) { connectManual() }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
                 .disabled(manualHost.isEmpty)

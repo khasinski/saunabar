@@ -18,9 +18,8 @@ fan — without opening the manufacturer's app or touching the wall panel.
 - **Auto-discovery**: scans your local subnet for a Saunum device on Modbus port 502, or enter the IP manually.
 - **Ready notification**: a macOS notification fires when the sauna reaches your target temperature.
 - **Diagnostics**: door state, active heater elements, device uptime, and controller alarms (thermal cutoff, door sensor, temperature sensor faults, etc.).
+- **Bilingual UI**: Polish and English, switchable live from Settings (defaults to your system language).
 - Native SwiftUI, runs as a background accessory app (no Dock icon).
-
-> The UI is in Polish.
 
 ## Requirements
 
@@ -88,7 +87,8 @@ Sources/SaunaBar/
   SaunaConfig.swift    # persisted device config
   SaunaView.swift      # main control popover
   DiscoveryView.swift  # first-run / discovery UI
-  SettingsView.swift   # device + polling settings
+  SettingsView.swift   # device + polling + language settings
+  Localization.swift   # Polish/English string tables + language toggle
 ```
 
 ## Disclaimer

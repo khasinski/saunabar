@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var monitor: SaunaMonitor
+    @ObservedObject private var loc = Localizer.shared
     var onBack: () -> Void
 
     @State private var host: String = ""
@@ -18,6 +19,7 @@ struct SettingsView: View {
                 VStack(spacing: 20) {
                     deviceSection
                     pollingSection
+                    languageSection
                     saveButton
                     forgetButton
                 }
@@ -38,7 +40,7 @@ struct SettingsView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 12, weight: .semibold))
-                    Text("Wróć")
+                    Text(loc.t(.back))
                         .font(.system(size: 13))
                 }
                 .foregroundStyle(.secondary)
@@ -47,13 +49,13 @@ struct SettingsView: View {
 
             Spacer()
 
-            Text("Ustawienia")
+            Text(loc.t(.settings))
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
 
             Spacer()
 
             // visual balance
-            Text("Wróć").font(.system(size: 13)).foregroundStyle(.clear)
+            Text(loc.t(.back)).font(.system(size: 13)).foregroundStyle(.clear)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -64,9 +66,9 @@ struct SettingsView: View {
 
     private var deviceSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            sectionLabel("Urządzenie")
+            sectionLabel(loc.t(.device))
             card {
-                row(label: "Adres IP") {
+                row(label: loc.t(.ipAddress)) {
                     TextField("192.168.0.x", text: $host)
                         .textFieldStyle(.plain)
                         .multilineTextAlignment(.trailing)
@@ -74,7 +76,7 @@ struct SettingsView: View {
                         .foregroundStyle(.primary)
                 }
                 divider
-                row(label: "Port") {
+                row(label: loc.t(.port)) {
                     TextField("502", text: $port)
                         .textFieldStyle(.plain)
                         .multilineTextAlignment(.trailing)
@@ -88,12 +90,29 @@ struct SettingsView: View {
 
     private var pollingSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            sectionLabel("Odświeżanie")
+            sectionLabel(loc.t(.refresh))
             card {
-                row(label: "Co ile sekund") {
+                row(label: loc.t(.everyHowManySeconds)) {
                     Picker("", selection: $refreshInterval) {
                         ForEach(intervals, id: \.self) { i in
-                            Text("\(i) s").tag(i)
+                            Text(loc.t(.secondsShort, i)).tag(i)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                }
+            }
+        }
+    }
+
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            sectionLabel(loc.t(.language))
+            card {
+                row(label: loc.t(.language)) {
+                    Picker("", selection: $loc.language) {
+                        ForEach(AppLanguage.allCases) { lang in
+                            Text(lang.displayName).tag(lang)
                         }
                     }
                     .pickerStyle(.menu)
@@ -105,7 +124,7 @@ struct SettingsView: View {
 
     private var saveButton: some View {
         Button(action: save) {
-            Text("Zapisz ustawienia")
+            Text(loc.t(.saveSettings))
                 .font(.system(size: 13, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
@@ -116,7 +135,7 @@ struct SettingsView: View {
 
     private var forgetButton: some View {
         Button(action: { monitor.forget() }) {
-            Label("Zapomnij urządzenie", systemImage: "trash")
+            Label(loc.t(.forgetDevice), systemImage: "trash")
                 .font(.system(size: 12))
                 .foregroundStyle(.red)
         }

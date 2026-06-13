@@ -15,19 +15,19 @@ class SaunaDiscovery: ObservableObject {
         isScanning  = true
         candidates  = []
         progress    = 0
-        statusText  = "Wykrywam sieć…"
+        statusText  = Localizer.shared.t(.detectingNetwork)
 
         // Run entire scan loop on background thread — never block the main thread.
         scanQueue.async {
             guard let subnet = self.localSubnet() else {
                 DispatchQueue.main.async {
-                    self.statusText = "Nie można wykryć sieci lokalnej"
+                    self.statusText = Localizer.shared.t(.cannotDetectNetwork)
                     self.isScanning = false
                 }
                 return
             }
 
-            DispatchQueue.main.async { self.statusText = "Skanuję \(subnet).1–254…" }
+            DispatchQueue.main.async { self.statusText = Localizer.shared.t(.scanningSubnet, subnet) }
 
             let total   = 254
             var checked = 0
@@ -50,7 +50,7 @@ class SaunaDiscovery: ObservableObject {
 
                         DispatchQueue.main.async {
                             self.progress   = p
-                            self.statusText = "Sprawdzam \(host)…"
+                            self.statusText = Localizer.shared.t(.checkingHost, host)
                             if let found { self.candidates.append(found) }
                         }
                         group.leave()
@@ -62,9 +62,9 @@ class SaunaDiscovery: ObservableObject {
             DispatchQueue.main.async {
                 self.isScanning = false
                 if self.candidates.isEmpty {
-                    self.statusText = "Nie znaleziono urządzenia Saunum"
+                    self.statusText = Localizer.shared.t(.noDeviceFound)
                 } else {
-                    self.statusText = "Znaleziono \(self.candidates.count) urządzenie(a)"
+                    self.statusText = Localizer.shared.t(.foundDeviceCount, self.candidates.count)
                 }
             }
         }

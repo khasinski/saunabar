@@ -28,14 +28,15 @@ enum SaunaStatus: Equatable {
     }
 
     var label: String {
+        let loc = Localizer.shared
         switch self {
-        case .unknown:     return "Brak połączenia"
-        case .idle:        return "Wyłączona"
-        case .cooling:     return "Stygnie"
-        case .ventilating: return "Wentylacja"
-        case .warming:     return "Nagrzewanie…"
-        case .almostReady: return "Prawie gotowa"
-        case .ready:       return "Gotowa! 🧖"
+        case .unknown:     return loc.t(.noConnection)
+        case .idle:        return loc.t(.off)
+        case .cooling:     return loc.t(.coolingDown)
+        case .ventilating: return loc.t(.ventilation)
+        case .warming:     return loc.t(.heating)
+        case .almostReady: return loc.t(.almostReady)
+        case .ready:       return loc.t(.ready)
         }
     }
 
@@ -110,13 +111,14 @@ enum SaunaAlarm: CaseIterable, Identifiable {
     var id: Self { self }
 
     var label: String {
+        let loc = Localizer.shared
         switch self {
-        case .doorOpenDuringHeating: return "Drzwi otwarte podczas grzania"
-        case .doorSensor:            return "Czujnik drzwi"
-        case .thermalCutoff:         return "Termik"
-        case .internalOverheat:      return "Przegrzanie wewnętrzne"
-        case .tempSensorShort:       return "Zwarcie czujnika temperatury"
-        case .tempSensorOpen:        return "Brak czujnika temperatury"
+        case .doorOpenDuringHeating: return loc.t(.alarmDoorOpenHeating)
+        case .doorSensor:            return loc.t(.alarmDoorSensor)
+        case .thermalCutoff:         return loc.t(.alarmThermalCutoff)
+        case .internalOverheat:      return loc.t(.alarmInternalOverheat)
+        case .tempSensorShort:       return loc.t(.alarmTempSensorShort)
+        case .tempSensorOpen:        return loc.t(.alarmTempSensorOpen)
         }
     }
 }
@@ -166,7 +168,7 @@ class SaunaMonitor: ObservableObject {
     var statusColor: Color     { saunaStatus.iconColor }
     var tempString: String     { temperature.map { "\($0)" } ?? "--" }
     var targetString: String   { "\(targetTemp)°C" }
-    var doorString: String     { doorOpen ? "Drzwi otwarte" : "Drzwi zamknięte" }
+    var doorString: String     { doorOpen ? Localizer.shared.t(.doorOpen) : Localizer.shared.t(.doorClosed) }
     var heaterElementsString: String { "\(heaterElementsActive)" }
     var displayedFanSpeed: Int { fanIsActive ? max(requestedFanSpeed, fanSpeed) : fanSpeed }
     var uptimeString: String {
@@ -179,7 +181,7 @@ class SaunaMonitor: ObservableObject {
         return "\(minutes)m"
     }
     var alarmSummary: String {
-        alarms.isEmpty ? "Brak alarmów" : "\(alarms.count) alarm"
+        alarms.isEmpty ? Localizer.shared.t(.noAlarms) : Localizer.shared.t(.alarmCount, alarms.count)
     }
     var fanIsActive: Bool      { fanSpeed > 0 || fanRemainingSeconds > 0 }
     var fanRemainingString: String {
@@ -467,8 +469,8 @@ class SaunaMonitor: ObservableObject {
 
     private func sendReadyNotification(temp: Int) {
         let content = UNMutableNotificationContent()
-        content.title = "Sauna gotowa! 🧖"
-        content.body  = "Temperatura osiągnęła \(temp)°C"
+        content.title = Localizer.shared.t(.saunaReadyTitle)
+        content.body  = Localizer.shared.t(.tempReached, temp)
         content.sound = .default
         let request = UNNotificationRequest(identifier: "sauna-ready", content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
