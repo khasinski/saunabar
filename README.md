@@ -30,6 +30,14 @@ fan — without opening the manufacturer's app or touching the wall panel.
 ## Build & run
 
 ```sh
+git clone https://github.com/khasinski/saunabar.git
+cd saunabar
+make run        # build, (ad-hoc) sign, and launch
+```
+
+Available targets:
+
+```sh
 make run        # build, (ad-hoc) sign, and launch
 make build      # build the release binary only
 make install    # build + assemble SaunaBar.app + sign
