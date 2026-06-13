@@ -14,7 +14,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 }
 
-enum LKey {
+enum LKey: CaseIterable {
     // Status
     case noConnection, off, coolingDown, ventilation, heating, almostReady, ready
     // Alarms
@@ -74,7 +74,7 @@ final class Localizer: ObservableObject {
         return args.isEmpty ? format : String(format: format, arguments: args)
     }
 
-    private static let pl: [LKey: String] = [
+    static let pl: [LKey: String] = [
         .noConnection: "Brak połączenia",
         .off: "Wyłączona",
         .coolingDown: "Stygnie",
@@ -159,7 +159,7 @@ final class Localizer: ObservableObject {
         .foundDeviceCount: "Znaleziono %d urządzenie(a)",
     ]
 
-    private static let en: [LKey: String] = [
+    static let en: [LKey: String] = [
         .noConnection: "No connection",
         .off: "Off",
         .coolingDown: "Cooling down",
