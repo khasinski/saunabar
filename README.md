@@ -8,7 +8,7 @@ turn the heater on/off, set a target temperature, toggle the light, and run the
 fan — without opening the manufacturer's app or touching the wall panel.
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="SaunaBar popover showing the sauna cooling down at 33°C with a 65°C target" width="300">
+  <img src="docs/screenshot.png" alt="SaunaBar popover showing the sauna heating up at 29°C toward a 55°C target" width="300">
 </p>
 
 ## Features
