@@ -1,5 +1,7 @@
 # SaunaBar
 
+[![CI](https://github.com/khasinski/saunabar/actions/workflows/ci.yml/badge.svg)](https://github.com/khasinski/saunabar/actions/workflows/ci.yml)
+
 A tiny macOS menu bar app for monitoring and controlling a **Saunum** sauna heater
 over Modbus TCP on your local network.
 
