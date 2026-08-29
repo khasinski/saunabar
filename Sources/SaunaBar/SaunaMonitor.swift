@@ -157,6 +157,11 @@ class SaunaMonitor: ObservableObject {
     // Suppress notification if sauna was already hot when the app launched.
     private var isFirstFetch = true
 
+    // While set in the future, ignore the target temperature read from the device
+    // (it briefly holds the factory default right after the heater is switched on).
+    private var ignoreTargetReadsUntil = Date.distantPast
+    private let targetRestoreWindow: TimeInterval = 10
+
     var saunaStatus: SaunaStatus {
         temperature.map {
             SaunaStatus(temp: $0, target: targetTemp, sessionActive: heaterOn, fanActive: fanIsActive)
@@ -258,7 +263,7 @@ class SaunaMonitor: ObservableObject {
                     self.saunaType = Int(regs[1])
                     self.saunaDuration = Int(regs[2])
                     let t = Int(regs[4])
-                    if t > 0 { self.targetTemp = t }
+                    if t > 0 && Date() >= self.ignoreTargetReadsUntil { self.targetTemp = t }
                     let fanMinutes = Int(regs[3])
                     if fanMinutes > 0 { self.fanDuration = fanMinutes }
                     let currentFanSpeed = max(0, min(3, Int(regs[5])))
@@ -302,8 +307,22 @@ class SaunaMonitor: ObservableObject {
         guard let client else { return }
         if !on { readyNotified = false }  // reset so next heat-up will notify
         heaterOn = on
+        let desiredTarget = UInt16(targetTemp)
+        // Powering on resets the device target to its own default, so ignore reads
+        // of the target register until we have written ours back.
+        if on { ignoreTargetReadsUntil = Date().addingTimeInterval(targetRestoreWindow) }
         client.writeRegister(addr: 0, value: on ? 1 : 0) { [weak self] success in
-            if !success { DispatchQueue.main.async { self?.heaterOn = !on } }
+            guard success else {
+                DispatchQueue.main.async {
+                    self?.heaterOn = !on
+                    if on { self?.ignoreTargetReadsUntil = .distantPast }
+                }
+                return
+            }
+            guard on else { return }
+            client.writeRegister(addr: 4, value: desiredTarget) { _ in
+                DispatchQueue.main.async { self?.ignoreTargetReadsUntil = .distantPast }
+            }
         }
     }
 
